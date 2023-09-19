@@ -1,0 +1,23 @@
+drop table if exists authorisation;
+drop table if exists repo;
+drop table if exists user;
+
+create table user (
+    id integer primary key auto_increment,
+    name varchar(200) not null,
+    apikey char(64) not null
+);
+
+create table repo (
+    id integer primary key auto_increment,
+    user_id integer not null references user(id),
+    owner varchar(100) not null,
+    name varchar(100) not null
+);
+
+create table authorisation (
+    id integer primary key auto_increment,
+    repo_id integer not null references repo(id),
+    auth_key char(64) not null,
+    expires datetime not null
+);
