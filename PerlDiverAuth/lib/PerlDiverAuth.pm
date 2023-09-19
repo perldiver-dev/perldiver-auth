@@ -65,18 +65,30 @@ get '/auth/:owner/:repo' => sub {
         });
     }
 
-    my $token = $repo->make_token('salt');
+    my $auth_token;
+    if (my $auth = $repo->authorisations->first) {
+        if ($auth->expires > DateTime->now) {
+            $auth_token = $auth->auth_key;
+            $auth->update({
+                expires => DateTime->now->add(hours => 2),
+            });
+        } else {
+            $auth->delete;
+        }
+    } else {
+        $auth_token = $repo->make_token('salt');
 
-    $repo->add_to_authorisations({
-        auth_key => $token,
-        expires => DateTime->now->add(hours => 2),
-    });
+        $repo->add_to_authorisations({
+            auth_key => $auth_token,
+            expires => DateTime->now->add(hours => 2),
+        });
+    }
 
     return encode_json({
         status => 'ok',
         code => 200,
         user => $user->name,
-        token => $token,
+        token => $auth_token,
     });
 };
 
