@@ -75,7 +75,9 @@ get '/auth/:owner/:repo' => sub {
         } else {
             $auth->delete;
         }
-    } else {
+    }
+
+    if (!auth_token) {
         $auth_token = $repo->make_token('salt');
 
         $repo->add_to_authorisations({
