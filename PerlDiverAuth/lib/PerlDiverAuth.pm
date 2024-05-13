@@ -4,6 +4,7 @@ use Dancer2;
 use PerlDiverAuth::Schema;
 
 use DateTime;
+use Sys::Hostname;
 
 our $VERSION = '0.1';
 
@@ -12,7 +13,7 @@ get '/' => sub {
         status => 'ok',
         code => 200,
         version => $VERSION,
-        server => `hostname`,
+        server => hostname,
     });
 };
 
