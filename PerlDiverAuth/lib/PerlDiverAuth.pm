@@ -12,6 +12,7 @@ get '/' => sub {
         status => 'ok',
         code => 200,
         version => $VERSION,
+        server => `hostname`,
     });
 };
 
