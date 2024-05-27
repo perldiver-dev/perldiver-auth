@@ -28,7 +28,7 @@ Daemon::Control->new({
 
   program      => '/usr/bin/starman',
   program_args => [ '--workers', 10, '-l', ":$ENV{PD_AUTH_APP_PORT}",
-                    "$abs_dir/../PerlDiverAuth/bin/app.psgi" ],
+                    "$abs_dir/PerlDiverAuth/bin/app.psgi" ],
 
   user  => $ENV{PD_AUTH_OWNER},
   group => $ENV{PD_AUTH_GROUP},
