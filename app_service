@@ -4,6 +4,8 @@ use warnings;
 use strict;
 use Daemon::Control;
 
+use ENV::Util -load_dotenv;
+
 use Cwd qw(abs_path);
 use File::Basename;
 
@@ -17,7 +19,7 @@ if (grep { ! defined $ENV{"PD_AUTH_DB_$_"} } @vars) {
 }
 
 Daemon::Control->new({
-  name      => 'PerlDiver Auth',
+  name      =>  ucfirst lc $ENV{PD_AUTH_APP_NAME},
   lsb_start => '$syslog $remote_fs',
   lsb_stop  => '$syslog',
   lsb_sdesc => 'PerlDiver Authorisation Service',
@@ -25,15 +27,15 @@ Daemon::Control->new({
   path      => $abs_path,
 
   program      => '/usr/bin/starman',
-  program_args => [ '--workers', 10, '-l', ':7777',
+  program_args => [ '--workers', 10, '-l', ":$ENV{PD_AUTH_APP_PORT}",
                     "$abs_dir/../PerlDiverAuth/bin/app.psgi" ],
 
-  user  => 'perlhacks',
-  group => 'psacln',
+  user  => $ENV{PD_AUTH_OWNER},
+  group => $ENV{PD_AUTH_GROUP},
 
-  pid_file    => '/var/run/pd_auth.pid',
-  stderr_file => '/var/log/pd_auth/error.log',
-  stdout_file => '/var/log/pd_auth/output.log',
+  pid_file    => "/var/run/$ENV{PD_AUTH_APP_NAME}.pid",
+  stderr_file => "$ENV{PD_AUTH_LOG_DIR}/error.log",
+  stdout_file => "$ENV{PD_AUTH_LOG_DIR}/output.log",
 
   fork => 2,
 })->run;
