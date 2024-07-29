@@ -27,7 +27,7 @@ Daemon::Control->new({
   path      => $abs_path,
 
   program      => '/usr/bin/starman',
-  program_args => [ '--workers', 10, '-l', ":$ENV{PD_AUTH_APP_PORT}",
+  program_args => [ '--workers', ($ENV{PD_AUTH_WORKER_COUNT} // 10), '-l', ":$ENV{PD_AUTH_APP_PORT}",
                     "$abs_dir/PerlDiverAuth/bin/app.psgi" ],
 
   user  => $ENV{PD_AUTH_OWNER},
