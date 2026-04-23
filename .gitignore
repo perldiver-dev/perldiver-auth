@@ -1,3 +1,4 @@
 db/perldiver-auth.conf
 .env
 .vscode/
+log/

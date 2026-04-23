@@ -17,6 +17,70 @@ get '/' => sub {
     });
 };
 
+get '/check/:owner/:repo' => sub {
+    my $token = query_parameters->get('token');
+
+    unless ($token) {
+        return encode_json({
+            status => 'error',
+            code => 400,
+            message => 'No token provided',
+        });
+    }
+
+    my $repo_owner = route_parameters->get('owner');
+    my $repo_name  = route_parameters->get('repo');
+
+    my $sch = PerlDiverAuth::Schema->get_schema;
+
+    my $auth = $sch->resultset('Authorisation')->find({
+        auth_key => $token,
+    });
+
+    unless ($auth) {
+        return encode_json({
+            status => 'error',
+            code => 400,
+            message => 'Invalid token',
+        });
+    }
+
+    if ($auth->expires < DateTime->now) {
+        $auth->delete;
+        return encode_json({
+            status => 'error',
+            code => 400,
+            message => 'Expired token',
+        });
+    }
+
+    my $repo = $auth->repo;
+    unless ($repo) {
+        $auth->delete;
+        return encode_json({
+            status => 'error',
+            code => 400,
+            message => 'Auth for non-existent repo',
+        });
+    }
+
+    unless ($repo->owner eq $repo_owner and $repo->name eq $repo_name) {
+        $auth->delete;
+        return encode_json({
+            status => 'error',
+            code => 400,
+            message => 'Repo does not match auth token',
+        });
+    }
+
+    return encode_json({
+        status => 'ok',
+        code => 200,
+        message => 'Auth OK',
+        authorised => 1,
+    });
+};
+
 get '/auth/:owner/:repo' => sub {
 
     my $key = query_parameters->get('key');
